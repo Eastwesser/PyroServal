@@ -10,13 +10,11 @@ from database.db_session import get_engine_and_session, init_db
 
 
 async def main():
-    # Setup logging
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         level=logging.INFO
     )
 
-    # Initialize the Telegram client
     app = Client(
         'pyro_bot',
         api_id=Config.API_ID,
@@ -29,7 +27,6 @@ async def main():
         logging.info("Starting the bot")
         await app.start()
 
-        # Initialize the database
         SessionLocal, async_engine = get_engine_and_session()
         await init_db(async_engine)
 

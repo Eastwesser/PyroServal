@@ -4,7 +4,6 @@ import re
 from datetime import datetime, timedelta
 
 from bot.triggers import handle_triggers
-from models.models import StatusEnum
 from models.models import User
 
 
@@ -22,7 +21,6 @@ def parse_interval(text):
     return interval
 
 
-# Function to send a message to a user
 async def send_message(client, user_id, text):
     try:
         await client.send_message(user_id, text)
@@ -32,7 +30,6 @@ async def send_message(client, user_id, text):
         raise e
 
 
-# Function to process messages and send scheduled messages
 async def process_messages(client, session_factory):
     try:
         while True:

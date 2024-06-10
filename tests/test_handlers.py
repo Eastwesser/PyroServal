@@ -1,63 +1,67 @@
-import os
-import sys
 import unittest
-import warnings
 from datetime import datetime
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock
 
-from pyrogram.types import Message, User as PyrogramUser
-from sqlalchemy import select
+from pyrogram import Client
 
 from bot.handlers import ClientHandler
-from database.db_session import init_db
+from database.db_session import SessionLocal, init_db, async_engine
 from models.models import User
 
-# Add the 'tests' directory to the module search path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+class TestHandlers(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        self.app = AsyncMock(Client)
+        await init_db(async_engine)
+        self.client_handler = ClientHandler(self.app)
 
-async def query_user(session, user_id):
-    result = await session.execute(select(User).filter(User.id == user_id))
-    return result.scalars().first()
+    async def asyncTearDown(self):
+        async with SessionLocal() as session:
+            await session.execute(User.__table__.delete())
+            await session.commit()
 
+    async def test_handle_incoming_message_new_user(self):
+        user_id = 123456789
+        message = AsyncMock()
+        message.from_user.id = user_id
+        message.text = "Hello, world!"
 
-class TestHandlers(unittest.TestCase):
-    def setUp(self):
-        # Initialize the database
-        self.SessionLocal, self.async_engine, self.init = init_db()
-        warnings.filterwarnings("ignore", category=RuntimeWarning)
-        self.init()
+        await self.client_handler.handle_incoming_message(self.app, message)
 
-    def tearDown(self):
-        # Clean up the database after each test
-        warnings.filterwarnings("ignore", category=RuntimeWarning)
-        self.async_engine.dispose()
-
-    async def test_handle_incoming_message(self):
-        # Create a fake client and message
-        app = MagicMock(name="Client")
-        app.send_message = MagicMock()
-
-        fake_user_id = 12345
-        fake_text = "test message"
-        fake_message = Message(
-            id=1,
-            date=datetime.utcnow(),
-            chat=PyrogramUser(id=fake_user_id, is_bot=False, first_name="Test"),
-            from_user=PyrogramUser(id=fake_user_id, is_bot=False, first_name="Test"),
-            text=fake_text,
-            client=app
-        )
-
-        # Initialize the handler and call the message handler
-        handler = ClientHandler(app)
-        await handler.handle_incoming_message(app, fake_message)
-
-        # Check the database for the new user
-        async with self.SessionLocal() as session:
-            user = await query_user(session, fake_user_id)
+        async with SessionLocal() as session:
+            user = await session.get(User, user_id)
             self.assertIsNotNone(user)
-            self.assertEqual(user.message_text, fake_text)
+            self.assertEqual(user.id, user_id)
+            self.assertEqual(user.message_text, "Hello, world!")
+
+    async def test_handle_incoming_message_existing_user(self):
+        user_id = 123456789
+        initial_text = "Initial message"
+        new_text = "Updated message"
+
+        async with SessionLocal() as session:
+            user = User(
+                id=user_id,
+                created_at=datetime.utcnow(),
+                status='alive',
+                status_updated_at=datetime.utcnow(),
+                last_message_time=datetime.utcnow(),
+                message_text=initial_text
+            )
+            session.add(user)
+            await session.commit()
+
+        message = AsyncMock()
+        message.from_user.id = user_id
+        message.text = new_text
+
+        await self.client_handler.handle_incoming_message(self.app, message)
+
+        async with SessionLocal() as session:
+            user = await session.get(User, user_id)
+            self.assertIsNotNone(user)
+            self.assertEqual(user.id, user_id)
+            self.assertEqual(user.message_text, new_text)
 
 
 if __name__ == '__main__':

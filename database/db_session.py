@@ -1,28 +1,31 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+import os
+
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from config import Config
-from models.models import Base
 
-
+# Define get_engine_and_session function
 def get_engine_and_session():
-    db_url = Config.DB_URL
-    async_engine = create_async_engine(
-        db_url,
-        echo=False,
-        future=True
-    )
-
-    SessionLocal = sessionmaker(
-        autocommit=False,
-        autoflush=False,
-        bind=async_engine,
-        class_=AsyncSession
-    )
-
-    return SessionLocal, async_engine
+    return async_engine, SessionLocal
 
 
-async def init_db(async_engine):
-    async with async_engine.begin() as conn:
+# Ensure DB_URL is correctly accessed
+engine_url = os.getenv('DB_URL')
+if not engine_url:
+    raise ValueError("DB_URL environment variable is not set")
+
+# Create async engine
+async_engine = create_async_engine(engine_url, echo=True)
+
+# Create session factory
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=async_engine, class_=AsyncSession)
+
+# Base model
+Base = declarative_base()
+
+
+async def init_db(engine):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)

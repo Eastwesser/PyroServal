@@ -1,28 +1,55 @@
-import asyncio
-import os
+import unittest
+from datetime import datetime
 
-from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-load_dotenv()
-DATABASE_URL = os.getenv('DB_URL')
-
-engine = create_async_engine(DATABASE_URL, echo=True)
-async_session = sessionmaker(
-    bind=engine,
-    class_=AsyncSession,
-    expire_on_commit=False
-)
+from config import Config
+from models.models import User, Base
 
 
-async def check_user():
-    async with async_session() as session:
-        result = await session.execute("SELECT * FROM users LIMIT 1;")
-        user = result.fetchone()
-        print(type(user))
-        if user:
-            print(user._mapping)  # For async results, use _mapping to access columns
+class TestUserChecker(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        self.engine = create_async_engine(Config.DB_URL, echo=False)
+        self.SessionLocal = sessionmaker(
+            autocommit=False,
+            autoflush=False,
+            bind=self.engine,
+            class_=AsyncSession
+        )
+        async with self.engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+
+    async def asyncTearDown(self):
+        async with self.engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+        await self.engine.dispose()
+
+    async def test_user_in_database(self):
+        user_id = 123456789
+        async with self.SessionLocal() as session:
+            new_user = User(
+                id=user_id,
+                created_at=datetime.utcnow(),
+                status='alive',
+                status_updated_at=datetime.utcnow(),
+                last_message_time=datetime.utcnow(),
+                message_text="Initial message"
+            )
+            session.add(new_user)
+            await session.commit()
+
+            user = await session.get(User, user_id)
+            self.assertIsNotNone(user)
+            self.assertEqual(user.id, user_id)
+            self.assertEqual(user.message_text, "Initial message")
+
+    async def test_user_not_in_database(self):
+        user_id = 987654321
+        async with self.SessionLocal() as session:
+            user = await session.get(User, user_id)
+            self.assertIsNone(user)
 
 
-asyncio.run(check_user())
+if __name__ == '__main__':
+    unittest.main()
