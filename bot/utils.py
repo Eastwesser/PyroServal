@@ -4,6 +4,7 @@ import re
 from datetime import datetime, timedelta
 
 from bot.triggers import handle_triggers
+from models.models import StatusEnum
 from models.models import User
 
 

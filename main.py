@@ -1,13 +1,12 @@
 import asyncio
 import logging
 
-import asyncpg
 from pyrogram import Client
 
 from bot.handlers import init_handlers
 from bot.utils import process_messages
 from config import Config
-from database.db_session import SessionLocal, init
+from database.db_session import get_engine_and_session, init_db
 
 
 async def main():
@@ -29,8 +28,11 @@ async def main():
     try:
         logging.info("Starting the bot")
         await app.start()
-        db_conn = await asyncpg.connect(Config.DB_URL)  # Connect to the database asynchronously
-        await init(db_conn)  # Initialize the database
+
+        # Initialize the database
+        SessionLocal, async_engine = get_engine_and_session()
+        await init_db(async_engine)
+
         init_handlers(app)
         process_task = asyncio.create_task(process_messages(app, SessionLocal))
         await process_task

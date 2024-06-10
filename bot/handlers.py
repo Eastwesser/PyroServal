@@ -4,8 +4,11 @@ from datetime import datetime
 from pyrogram import Client, filters
 
 from bot.triggers import handle_triggers
-from database.db_session import SessionLocal
+from database.db_session import get_engine_and_session
 from models.models import User
+
+# Initialize database session and engine
+SessionLocal, async_engine = get_engine_and_session()
 
 
 def init_handlers(app: Client):
