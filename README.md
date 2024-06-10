@@ -44,6 +44,8 @@ Create a `.env` file in the project root directory and add the following variabl
 Replace `your_api_id`, `your_api_hash`, `your_bot_token`, `username`, `password`, and `mydatabase` with your actual
 values.
 
+NOTE: You can find templates in the template folder of this project!
+
 4. Run the bot:
 
 python main.py
