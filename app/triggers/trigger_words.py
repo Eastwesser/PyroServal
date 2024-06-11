@@ -2,6 +2,7 @@ import asyncio
 import logging
 from datetime import datetime, timedelta
 
+from pyrogram import Client, filters
 from sqlalchemy.future import select
 
 from app.database.database import get_db
@@ -24,7 +25,15 @@ async def send_message(client, user, message_text):
         user.status_updated_at = datetime.now()
 
 
-async def check_and_send_messages(client):
+async def check_and_send_messages(client: Client):
+    # Register a handler to check for trigger words
+    @client.on_message(filters.text & filters.private)
+    async def check_message(client, message):
+        if "trigger" in message.text:
+            await message.reply("Trigger word detected!")
+            logger.info(f"Replied to message with trigger word from {message.from_user.id}.")
+
+    # Main loop to check and send scheduled messages
     while True:
         async with get_db() as db:
             now = datetime.now()

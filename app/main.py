@@ -1,9 +1,13 @@
 import asyncio
 import logging
 
-from pyrogram import Client
+from pyrogram import Client, idle
 
-from app.config import API_ID, API_HASH, BOT_TOKEN
+from app.config import (
+    API_ID,
+    API_HASH,
+    BOT_TOKEN,
+)
 from app.handlers.message_handlers import register_handlers
 from app.triggers.trigger_words import check_and_send_messages
 
@@ -28,11 +32,11 @@ async def main():
 
     register_handlers(client)
 
-    # Run other coroutines in the background if needed
-    await check_and_send_messages(client)
+    # Run the check_and_send_messages coroutine in the background
+    asyncio.create_task(check_and_send_messages(client))
 
     # Wait until the client disconnects
-    await client.idle()
+    await idle()
 
 
 if __name__ == "__main__":

@@ -1,13 +1,13 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, String, Integer
+from sqlalchemy import Column, DateTime, String, BigInteger
 
 from app.database.database import Base
 
 
 class User(Base):
     __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     status = Column(String(50))
     status_updated_at = Column(DateTime, default=datetime.utcnow)
