@@ -6,8 +6,10 @@ A simple Pyrogram bot template with SQLAlchemy integration for handling messages
 
 - Handles incoming messages from users
 - Updates user statuses based on keywords present in the messages
+- Converts all incoming messages to lowercase for consistent keyword detection
 - Uses Pyrogram for Telegram bot API interactions
 - Utilizes SQLAlchemy for database management
+- Includes scheduled message checks and updates
 
 ## Prerequisites
 
@@ -48,7 +50,14 @@ NOTE: You can find templates in the template folder of this project!
 
 4. Run the bot:
 
-python main.py
+python -m app.main 
+
+## Project Structure
+
+- app/handlers/message_handlers.py: Contains the message handling logic.
+- app/triggers/trigger_words.py: Manages scheduled checks and responses based on user statuses and message content.
+- app/database: Contains database models and setup.
+- main.py: Entry point for running the bot.
 
 ## Usage
 
