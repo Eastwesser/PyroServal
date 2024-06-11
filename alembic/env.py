@@ -1,41 +1,59 @@
 import os
 import sys
-from logging.config import fileConfig
+from logging.config import dictConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy import create_engine, pool
 
-# Import your model's Base class
+# Add the project root directory to the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from models.models import Base
+from app.database.models.models import Base
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+# Database URL (using psycopg2 instead of asyncpg)
+engine_url = "postgresql://postgres:password@localhost:5432/funnel_bot"
+
+# Alembic Config object, which provides access to the values within the .ini file in use.
 config = context.config
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
-fileConfig(config.config_file_name)
+# Set the SQLAlchemy URL from the engine URL
+config.set_main_option('sqlalchemy.url', engine_url)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
+# Configure the logger
+dictConfig({
+    "version": 1,
+    "formatters": {
+        "generic": {
+            "format": "%(levelname)-5.5s [%(name)s] %(message)s",
+            "datefmt": "%H:%M:%S",
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stderr",
+            "level": "NOTSET",
+            "formatter": "generic"
+        }
+    },
+    "root": {
+        "level": "WARN",
+        "handlers": ["console"]
+    },
+    "loggers": {
+        "alembic": {
+            "level": "INFO",
+            "handlers": []
+        }
+    }
+})
+
+# Add your model's MetaData object here for 'autogenerate' support
 target_metadata = Base.metadata
 
 
 def run_migrations_offline():
-    """Run migrations in 'offline' mode.
-
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well. By skipping the Engine creation
-    we don't even need a DBAPI to be available.
-
-    Calls to context.execute() here emit the given string to the
-    script output.
-
-    """
+    """Run migrations in 'offline' mode."""
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -48,38 +66,22 @@ def run_migrations_offline():
         context.run_migrations()
 
 
-def do_run_migrations(connection):
-    context.configure(connection=connection, target_metadata=target_metadata)
+def run_migrations_online():
+    """Run migrations in 'online' mode."""
+    # Create a synchronous engine for migrations
+    sync_engine = create_engine(engine_url, poolclass=pool.NullPool)
 
-    with context.begin_transaction():
-        context.run_migrations()
-
-
-async def run_migrations_online():
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
-    connectable = AsyncEngine(
-        engine_from_config(
-            config.get_section(config.config_ini_section),
-            prefix="sqlalchemy.",
-            poolclass=pool.NullPool,
-            future=True,
+    with sync_engine.connect() as connection:
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
         )
-    )
 
-    async with connectable.connect() as connection:
-        await connection.run_sync(do_run_migrations)
-
-    await connectable.dispose()
+        with context.begin_transaction():
+            context.run_migrations()
 
 
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    import asyncio
-
-    asyncio.run(run_migrations_online())
+    run_migrations_online()
