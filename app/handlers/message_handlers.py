@@ -15,7 +15,7 @@ def register_handlers(app: Client):
     async def handle_message(client, message):
         logger.info("handle_message called")
         user_id = message.from_user.id
-        text = message.text
+        text = message.text.lower()  # Convert message to lowercase
 
         logger.info(f"Received message from {user_id}: {text}")
 
@@ -36,6 +36,6 @@ def register_handlers(app: Client):
                 user.status_updated_at = datetime.now()
                 await db.commit()
                 logger.info(f"User {user_id}'s status updated to 'finished'.")
-                await message.reply("Your status has been updated to 'finished'.")
+                await message.reply("Ваша воронка успешно завершена!")
             else:
                 logger.info(f"No trigger words found in message from {user_id}")

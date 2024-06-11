@@ -11,6 +11,21 @@ from app.database.models.models import User
 logger = logging.getLogger(__name__)
 
 
+# Function to check for trigger words in user messages
+async def check_for_trigger_words(client: Client, user: User):
+    async with get_db() as db:
+        async with db.begin():
+            result = await db.execute(select(User).where(User.id == user.id))
+            user = result.scalars().first()
+            if user.message_text:
+                message_text_lower = user.message_text.lower()  # Convert message to lowercase
+                if "прекрасно" in message_text_lower or "ожидать" in message_text_lower:
+                    user.status = "finished"
+                    await db.commit()
+                    return True
+            return False
+
+
 async def send_message(client, user, message_text):
     try:
         await client.send_message(user.id, message_text)
@@ -28,7 +43,7 @@ async def check_and_send_messages(client: Client):
     @client.on_message(filters.text & filters.private)
     async def check_message(client, message):
         logger.info(f"Checking message from {message.from_user.id}")
-        if "trigger" in message.text:
+        if "trigger" in message.text.lower():  # Convert message to lowercase
             await message.reply("Trigger word detected!")
             logger.info(f"Replied to message with trigger word from {message.from_user.id}.")
 
@@ -48,16 +63,25 @@ async def check_and_send_messages(client: Client):
 
                         if user.status == "alive" and time_since_last_message >= timedelta(
                                 minutes=6) and user.message_text is None:
+                            if await check_for_trigger_words(client, user):
+                                logger.info(f"Trigger word found for user {user.id}, stopping message sequence.")
+                                continue
                             await send_message(client, user, "Текст1")
                             user.message_text = "Текст1"
                             user.status_updated_at = now
 
                         elif user.message_text == "Текст1" and time_since_last_message >= timedelta(minutes=39):
+                            if await check_for_trigger_words(client, user):
+                                logger.info(f"Trigger word found for user {user.id}, stopping message sequence.")
+                                continue
                             await send_message(client, user, "Текст2")
                             user.message_text = "Текст2"
                             user.status_updated_at = now
 
                         elif user.message_text == "Текст2" and time_since_last_message >= timedelta(days=1, hours=2):
+                            if await check_for_trigger_words(client, user):
+                                logger.info(f"Trigger word found for user {user.id}, stopping message sequence.")
+                                continue
                             await send_message(client, user, "Текст3")
                             user.message_text = "Текст3"
                             user.status = "finished"
