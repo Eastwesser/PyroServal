@@ -30,12 +30,12 @@ def register_handlers(app: Client):
                 await db.commit()
                 logger.info(f"User {user_id} successfully added.")
 
-                # Process message for trigger words
-                if "прекрасно" in text or "ожидать" in text:
-                    user.status = "finished"
-                    user.status_updated_at = datetime.now()
-                    await db.commit()
-                    logger.info(f"User {user_id}'s status updated to 'finished'.")
-                    await message.reply("Your status has been updated to 'finished'.")
-                else:
-                    logger.info(f"No trigger words found in message from {user_id}")
+            # Process message for trigger words
+            if "прекрасно" in text or "ожидать" in text:
+                user.status = "finished"
+                user.status_updated_at = datetime.now()
+                await db.commit()
+                logger.info(f"User {user_id}'s status updated to 'finished'.")
+                await message.reply("Your status has been updated to 'finished'.")
+            else:
+                logger.info(f"No trigger words found in message from {user_id}")
