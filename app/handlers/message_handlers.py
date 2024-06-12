@@ -10,12 +10,13 @@ from app.database.models.models import User
 logger = logging.getLogger(__name__)
 
 
+# Регистрация хендлеров для обработки сообщений
 def register_handlers(app: Client):
     @app.on_message(filters.text)
     async def handle_message(client, message):
         logger.info("handle_message called")
         user_id = message.from_user.id
-        text = message.text.lower()  # Convert message to lowercase
+        text = message.text.lower()  # Преобразование сообщения в нижний регистр
 
         logger.info(f"Received message from {user_id}: {text}")
 
@@ -25,15 +26,23 @@ def register_handlers(app: Client):
 
             if not user:
                 logger.info(f"User {user_id} not found in database. Adding user.")
-                user = User(id=user_id, message_text=text)
+                user = User(id=user_id, message_text=text, status="alive", status_updated_at=datetime.utcnow(),
+                            last_message_time=datetime.utcnow())
                 db.add(user)
                 await db.commit()
                 logger.info(f"User {user_id} successfully added.")
+            else:
+                user.message_text = text
+                user.status = "alive"
+                user.status_updated_at = datetime.utcnow()
+                user.last_message_time = datetime.utcnow()
+                await db.commit()
+                logger.info(f"User {user_id}'s status updated to 'alive'.")
 
-            # Process message for trigger words
+            # Обработка сообщения для слов-триггеров
             if "прекрасно" in text or "ожидать" in text:
                 user.status = "finished"
-                user.status_updated_at = datetime.now()
+                user.status_updated_at = datetime.utcnow()
                 await db.commit()
                 logger.info(f"User {user_id}'s status updated to 'finished'.")
                 await message.reply("Ваша воронка успешно завершена!")

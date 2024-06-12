@@ -14,6 +14,7 @@ from app.triggers.trigger_words import check_and_send_messages
 logger = logging.getLogger(__name__)
 
 
+# Функция для создания клиента Pyrogram
 async def create_client():
     client = Client(
         "pyro_serval",
@@ -21,21 +22,19 @@ async def create_client():
         api_hash=API_HASH,
         bot_token=BOT_TOKEN
     )
-
     await client.start()
-
     return client
 
 
+# Основная функция
 async def main():
     client = await create_client()
-
     register_handlers(client)
 
-    # Run the check_and_send_messages coroutine in the background
+    # Запуск задачи для проверки и отправки сообщений в фоновом режиме
     asyncio.create_task(check_and_send_messages(client))
 
-    # Wait until the client disconnects
+    # Ожидание отключения клиента
     await idle()
 
 

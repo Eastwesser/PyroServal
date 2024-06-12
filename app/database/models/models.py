@@ -1,10 +1,16 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, String, BigInteger
+from sqlalchemy import (
+    Column,
+    DateTime,
+    String,
+    BigInteger,
+)
 
 from app.database.database import Base
 
 
+# Определение модели пользователя
 class User(Base):
     __tablename__ = 'users'
     id = Column(BigInteger, primary_key=True, autoincrement=True)

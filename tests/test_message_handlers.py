@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 from pyrogram import Client
 
-from app.handlers.message_handlers import handle_message
+from app.handlers.message_handlers import register_handlers
 
 
 class TestMessageHandlers(unittest.TestCase):
@@ -16,7 +16,7 @@ class TestMessageHandlers(unittest.TestCase):
 
         mock_client = MagicMock(spec=Client)
 
-        await handle_message(mock_client, mock_message)
+        await register_handlers(mock_client, mock_message)
 
         mock_message.reply.assert_called()
 

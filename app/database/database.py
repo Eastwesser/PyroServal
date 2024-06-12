@@ -1,17 +1,14 @@
 from contextlib import asynccontextmanager
 
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.config import DB_URL
 
-engine = create_async_engine(
-    DB_URL,
-    echo=True,
-)
+# Создание асинхронного двигателя базы данных
+engine = create_async_engine(DB_URL, echo=True)
 
+# Создание фабрики сессий для работы с базой данных
 async_session = sessionmaker(
     engine,
     class_=AsyncSession,
@@ -21,7 +18,7 @@ async_session = sessionmaker(
 Base = declarative_base()
 
 
-# Define get_db() as an asynchronous function
+# Асинхронная функция для получения сессии базы данных
 @asynccontextmanager
 async def get_db():
     async with async_session() as session:

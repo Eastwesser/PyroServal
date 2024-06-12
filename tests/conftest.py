@@ -1,10 +1,8 @@
-# tests/conftest.py
-
 import asyncio
 import os
 import sys
 
-# Ensure the project directory is in the sys.path before any imports
+# Убедитесь, что директория проекта добавлена в sys.path перед импортом
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import pytest
@@ -27,7 +25,9 @@ async def engine():
 @pytest.fixture(scope="session")
 async def async_session_factory(engine):
     return sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
 
 

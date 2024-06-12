@@ -8,26 +8,26 @@ from sqlalchemy.orm import sessionmaker
 
 async def check_database():
     try:
-        # Get the database URL from the environment variable
+        # Получаем URL базы данных из переменной окружения
         db_url = os.getenv('DB_URL')
 
         if db_url:
-            # Create an async engine
+            # Создаем асинхронный engine
             async_engine = create_async_engine(db_url, echo=True)
 
-            # Create a synchronous sessionmaker
+            # Создаем синхронный sessionmaker
             Session = sessionmaker(bind=async_engine)
 
             async with async_engine.connect() as conn:
                 print("Database connected successfully")
 
-                # Create a MetaData object
+                # Создаем объект MetaData
                 metadata = MetaData()
 
-                # Reflect the existing database schema using a synchronous session
+                # Отражаем существующую схему базы данных с использованием синхронной сессии
                 await conn.run_sync(metadata.reflect)
 
-                # Check if the 'users' table exists in the metadata
+                # Проверяем, существует ли таблица 'users' в метаданных
                 if 'users' in metadata.tables:
                     print("The 'users' table exists in the database")
                 else:

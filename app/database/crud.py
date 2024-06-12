@@ -5,6 +5,7 @@ from app.database.database import get_db
 from app.database.models.models import User
 
 
+# Функция для добавления нового пользователя в базу данных
 async def add_user(user_id):
     logging.info(f"Adding user with ID: {user_id}")
     async with get_db() as db:

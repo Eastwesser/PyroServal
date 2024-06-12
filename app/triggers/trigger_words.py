@@ -11,14 +11,14 @@ from app.database.models.models import User
 logger = logging.getLogger(__name__)
 
 
-# Function to check for trigger words in user messages
+# Функция для проверки наличия слов-триггеров в сообщениях пользователя
 async def check_for_trigger_words(client: Client, user: User):
     async with get_db() as db:
         async with db.begin():
             result = await db.execute(select(User).where(User.id == user.id))
             user = result.scalars().first()
             if user.message_text:
-                message_text_lower = user.message_text.lower()  # Convert message to lowercase
+                message_text_lower = user.message_text.lower()  # Преобразование сообщения в нижний регистр
                 if "прекрасно" in message_text_lower or "ожидать" in message_text_lower:
                     user.status = "finished"
                     await db.commit()
@@ -26,6 +26,7 @@ async def check_for_trigger_words(client: Client, user: User):
             return False
 
 
+# Функция для отправки сообщения пользователю
 async def send_message(client, user, message_text):
     try:
         await client.send_message(user.id, message_text)
@@ -39,11 +40,12 @@ async def send_message(client, user, message_text):
         user.status_updated_at = datetime.now()
 
 
+# Функция для проверки и отправки сообщений по расписанию
 async def check_and_send_messages(client: Client):
     @client.on_message(filters.text & filters.private)
     async def check_message(client, message):
         logger.info(f"Checking message from {message.from_user.id}")
-        if "trigger" in message.text.lower():  # Convert message to lowercase
+        if "trigger" in message.text.lower():  # Преобразование сообщения в нижний регистр
             await message.reply("Trigger word detected!")
             logger.info(f"Replied to message with trigger word from {message.from_user.id}.")
 

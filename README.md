@@ -67,6 +67,20 @@ python -m app.main
   updates for users.
 - Customize the bot logic in `main.py` according to your requirements.
 
+## Docker
+
+Ensure you have Docker and Docker Compose installed.
+
+Build the Docker images:
+
+- docker-compose build
+
+Run the containers:
+
+- docker-compose up -d
+
+This will start the bot and the PostgreSQL database in detached mode.
+
 ## Acknowledgements
 
 - [Pyrogram](https://github.com/pyrogram/pyrogram) - Telegram bot framework

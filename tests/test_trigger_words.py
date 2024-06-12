@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.database.models.models import User
-from app.handlers.message_handlers import handle_message
+from app.handlers.message_handlers import register_handlers
 
 
 class TestTriggerWords(unittest.TestCase):
@@ -22,7 +22,7 @@ class TestTriggerWords(unittest.TestCase):
 
         mock_client = MagicMock()
 
-        await handle_message(mock_client, mock_message)
+        await register_handlers(mock_client, mock_message)
 
         mock_message.reply.assert_called_once_with("Ваша воронка успешно завершена!")
 
