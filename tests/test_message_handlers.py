@@ -1,29 +1,25 @@
 import unittest
 from unittest.mock import AsyncMock, MagicMock
 
-from pyrogram import Client, types
+from pyrogram import Client
 
-from app.handlers.message_handlers import register_handlers
+from app.handlers.message_handlers import handle_message
 
 
-class TestMessageHandlers(unittest.IsolatedAsyncioTestCase):
+class TestMessageHandlers(unittest.TestCase):
 
     async def test_handle_message(self):
-        mock_message = MagicMock(spec=types.Message)
-        mock_message.configure_mock(from_user=MagicMock(id=123))
+        mock_message = MagicMock()
+        mock_message.from_user.id = 123
         mock_message.text = "Прекрасно"
         mock_message.reply = AsyncMock()
 
-        # Mock the client and its on_message method
         mock_client = MagicMock(spec=Client)
-        mock_client.on_message = AsyncMock()
 
-        # Assuming register_handlers is the function that processes the message
-        await register_handlers(mock_client, mock_message)
+        await handle_message(mock_client, mock_message)
 
-        # Check if the reply method was called
         mock_message.reply.assert_called()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

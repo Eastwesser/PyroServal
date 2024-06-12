@@ -1,11 +1,16 @@
+# tests/conftest.py
+
+import asyncio
 import os
 import sys
 
+# Ensure the project directory is in the sys.path before any imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+
 from app.config import DB_URL
 
 
@@ -31,3 +36,10 @@ async def session(async_session_factory):
     async with async_session_factory() as session:
         async with session.begin():
             yield session
+
+
+@pytest.fixture(scope="module")
+def event_loop():
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()

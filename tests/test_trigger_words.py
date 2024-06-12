@@ -1,29 +1,31 @@
 import unittest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from pyrogram import Client, types
+from app.database.models.models import User
+from app.handlers.message_handlers import handle_message
 
-from app.handlers.message_handlers import handle_message  # Update with actual import path
 
+class TestTriggerWords(unittest.TestCase):
 
-class TestMessageHandlers(unittest.IsolatedAsyncioTestCase):
-
-    async def test_handle_message(self):
-        mock_message = MagicMock(spec=types.Message)
-        mock_message.configure_mock(from_user=MagicMock(id=123))
+    @patch('app.database.database.get_db')
+    async def test_check_for_trigger_words(self, mock_get_db):
+        mock_message = MagicMock()
+        mock_message.from_user.id = 123
         mock_message.text = "Прекрасно"
         mock_message.reply = AsyncMock()
 
-        # Mock the client and its on_message method
-        mock_client = MagicMock(spec=Client)
-        mock_client.on_message = AsyncMock()
+        mock_db = MagicMock()
+        mock_get_db.return_value.__aenter__.return_value = mock_db
 
-        # Assuming handle_message is the function that processes the message
+        mock_user = User(id=123, message_text="some text")
+        mock_db.execute.return_value.scalars.return_value.first.return_value = mock_user
+
+        mock_client = MagicMock()
+
         await handle_message(mock_client, mock_message)
 
-        # Check if the reply method was called
-        mock_message.reply.assert_called()
+        mock_message.reply.assert_called_once_with("Ваша воронка успешно завершена!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

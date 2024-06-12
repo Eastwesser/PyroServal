@@ -1,11 +1,9 @@
-# tests/test_config.py
 import os
 from unittest import TestCase
 from unittest.mock import patch
 
 
 class TestConfig(TestCase):
-
     @patch.dict(os.environ, {
         'API_ID': '123456',
         'API_HASH': 'fake_hash',
@@ -13,7 +11,6 @@ class TestConfig(TestCase):
         'DB_URL': 'postgresql://fake:fake@localhost/fake_db'
     })
     def test_env_variables(self):
-        # Remove config module from sys.modules to force reload
         import sys
         if 'app.config' in sys.modules:
             del sys.modules['app.config']

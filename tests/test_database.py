@@ -1,19 +1,18 @@
 import os
 import sys
-
-# Ensure the project directory is in the sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 import unittest
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.database.database import engine, Base
-from app.database.models.models import User
 from sqlalchemy.future import select
 from sqlalchemy.orm import sessionmaker
 
+from app.database.database import engine, Base
+from app.database.models.models import User
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 
 class TestDatabase(unittest.IsolatedAsyncioTestCase):
-
     async def asyncSetUp(self):
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)

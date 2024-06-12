@@ -5,13 +5,15 @@ from logging.config import dictConfig
 from alembic import context
 from sqlalchemy import create_engine, pool
 
+from app.config import ENGINE_URL
+
 # Add the project root directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app.database.models.models import Base
 
 # Database URL (using psycopg2 instead of asyncpg)
-engine_url = "postgresql://postgres:password@localhost:5432/funnel_bot"
+engine_url = ENGINE_URL
 
 # Alembic Config object, which provides access to the values within the .ini file in use.
 config = context.config
