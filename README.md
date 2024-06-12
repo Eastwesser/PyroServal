@@ -32,6 +32,8 @@ git clone https://github.com/Eastwesser/PyroBot.git
 
 2. Install the dependencies:
 
+.venv\Scripts\activate
+
 pip install -r requirements.txt
 
 3. Set up environment variables:
