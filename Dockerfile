@@ -1,14 +1,19 @@
 FROM python:3.10-slim
 
+# Установитe переменные окружения
+ENV PYTHONUNBUFFERED=1
+
+# Установитe рабочий каталог
 WORKDIR /app
 
-# Установка зависимостей
-RUN apt-get update && apt-get install -y gcc libpq-dev
+# Скачайте зависимости
+COPY requirements.txt /app/
 
-COPY requirements.txt .
-
+# Установите зависимости
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Скопируйте остальной код приложения
+COPY . /app/
 
-CMD ["python", "app/main.py"]
+# Start the bot
+CMD ["python", "-m", "app.main"]

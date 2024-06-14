@@ -7,7 +7,7 @@ services:
     environment:
       - API_ID=${API_ID}
       - API_HASH=${API_HASH}
-      - BOT_TOKEN=${BOT_TOKEN}
+      - SESSION_NAME=${SESSION_NAME}
       - DB_URL=${DB_URL}
       - ENGINE_URL=${ENGINE_URL}
     depends_on:

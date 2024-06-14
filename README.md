@@ -42,11 +42,11 @@ Create a `.env` file in the project root directory and add the following variabl
 
 - API_ID=your_api_id
 - API_HASH=your_api_hash
-- BOT_TOKEN=your_bot_token
 - DB_URL=postgresql://username@localhost/mydatabase
+- SESSION_NAME=your_session_name
 
-Replace `your_api_id`, `your_api_hash`, `your_bot_token`, `username`, `password`, and `mydatabase` with your actual
-values.
+Replace `your_api_id`, `your_api_hash`, `username`, `password`, `mydatabase`, 
+and `your_session_name` with your actual values.
 
 NOTE: You can find templates in the template folder of this project!
 
