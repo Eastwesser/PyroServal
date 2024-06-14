@@ -26,23 +26,25 @@ def register_handlers(app: Client):
 
             if not user:
                 logger.info(f"User {user_id} not found in database. Adding user.")
-                user = User(id=user_id, message_text=text, status="alive", status_updated_at=datetime.utcnow(),
-                            last_message_time=datetime.utcnow())
+                user = User(id=user_id, message_text=text, status="alive", status_updated_at=datetime.now(),
+                            last_message_time=datetime.now())
                 db.add(user)
                 await db.commit()
                 logger.info(f"User {user_id} successfully added.")
             else:
-                user.message_text = text
-                user.status = "alive"
-                user.status_updated_at = datetime.utcnow()
-                user.last_message_time = datetime.utcnow()
-                await db.commit()
+                user.message_text = text  # Обновляем текст последнего сообщения пользователя
+                user.status = "alive"  # Устанавливаем статус пользователя как "alive"
+                user.status_updated_at = datetime.now()  # Обновляем временную метку последнего обновления статуса
+                user.last_message_time = datetime.now()  # Обновляем временную метку последнего сообщения пользователя
+                await db.commit()  # Фиксируем изменения в базе данных
+
+                # Логируем успешное обновление статуса пользователя
                 logger.info(f"User {user_id}'s status updated to 'alive'.")
 
             # Обработка сообщения для слов-триггеров
             if "прекрасно" in text or "ожидать" in text:
                 user.status = "finished"
-                user.status_updated_at = datetime.utcnow()
+                user.status_updated_at = datetime.now()
                 await db.commit()
                 logger.info(f"User {user_id}'s status updated to 'finished'.")
                 await message.reply("Ваша воронка успешно завершена!")

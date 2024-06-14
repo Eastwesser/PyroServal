@@ -15,7 +15,6 @@ async def add_user(user_id):
             status="alive",
             status_updated_at=datetime.now(),
             last_message_time=datetime.now(),
-            message_text=None,
         )
         db.add(user)
         await db.commit()

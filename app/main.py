@@ -6,7 +6,7 @@ from pyrogram import Client, idle
 from app.config import (
     API_ID,
     API_HASH,
-    BOT_TOKEN,
+    SESSION_NAME,
 )
 from app.handlers.message_handlers import register_handlers
 from app.triggers.trigger_words import check_and_send_messages
@@ -17,10 +17,9 @@ logger = logging.getLogger(__name__)
 # Функция для создания клиента Pyrogram
 async def create_client():
     client = Client(
-        "pyro_serval",
+        SESSION_NAME,
         api_id=API_ID,
         api_hash=API_HASH,
-        bot_token=BOT_TOKEN
     )
     await client.start()
     return client

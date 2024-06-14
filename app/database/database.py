@@ -5,8 +5,11 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.config import DB_URL
 
-# Создание асинхронного двигателя базы данных
-engine = create_async_engine(DB_URL, echo=True)
+# Создание асинхронного движка базы данных
+engine = create_async_engine(
+    DB_URL,
+    echo=True,
+)
 
 # Создание фабрики сессий для работы с базой данных
 async_session = sessionmaker(
